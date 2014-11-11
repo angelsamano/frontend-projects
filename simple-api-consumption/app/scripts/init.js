@@ -34,9 +34,13 @@ requirejs.config({
             'vendor/typeahead.bundle'
         ],
 
+        text: [
+            '//cdnjs.cloudflare.com/ajax/libs/require-text/2.0.12/text',
+            'vendor/require-text'
+        ],
+
         functions: 'functions',
-        templates: '../templates',
-        text: 'vendor/text'
+        templates: '../templates'
     },
 
     // Using shims to:
@@ -64,6 +68,12 @@ requirejs.config({
 define(function(require) {
     var $ = require('functions'),
         Application = require('dependencies/application');
+
+    // Making underscore templating engine looks like handlebarsJS
+    // Using {{ }} innstead of <% %> 
+    _.templateSettings = {
+        interpolate: /\{\{(.+?)\}\}/g
+    };
 
     Application.initialize();
 });
