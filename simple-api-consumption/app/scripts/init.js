@@ -34,7 +34,9 @@ requirejs.config({
             'vendor/typeahead.bundle'
         ],
 
-        functions: 'functions'
+        functions: 'functions',
+        templates: '../templates',
+        text: 'vendor/text'
     },
 
     // Using shims to:

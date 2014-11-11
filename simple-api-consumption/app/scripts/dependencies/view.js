@@ -19,8 +19,9 @@ define(function(require) {
 
 				this.model.fetch({
 					success: function(model) {
-						var uniqueListedMonths = model.get('metadata').uniqueListedMonths,
-							template = _.template($('#content-template').html());
+						var contentTemplate = require('text!templates/content-template.html'),
+							uniqueListedMonths = model.get('metadata').uniqueListedMonths,
+							template = _.template(contentTemplate);
 
 						that.$el.html(template);
 
@@ -40,7 +41,7 @@ define(function(require) {
 			},
 
 			obtainResults: function(event) {
-				var that = this,
+				var resultsTemplate = require('text!templates/results-template.html'),
 					userEnteredInput = $('#date').val(),
 					resultsArray = this.model.get('results'),
 					currentMonth = $.getCurrentDateString('YYYY-MM'),
@@ -52,6 +53,7 @@ define(function(require) {
 					}),
 
 					template,
+					that = this,
 					results = {
 						revenue: 0,
 						capacity: totalCapacity
@@ -71,7 +73,7 @@ define(function(require) {
 					});
 				}
 
-				template = _.template($('#results-template').html(), {
+				template = _.template(resultsTemplate, {
 					variable: 'data'
 				})({
 					enteredMonth: userEnteredInput,
