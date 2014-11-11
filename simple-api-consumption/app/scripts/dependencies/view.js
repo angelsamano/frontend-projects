@@ -20,7 +20,7 @@ define(function(require) {
 				this.model.fetch({
 					success: function(model) {
 						var uniqueListedMonths = model.get('metadata').uniqueListedMonths,
-							template = _.template($('#app-template').html(), {});
+							template = _.template($('#content-template').html());
 
 						that.$el.html(template);
 
@@ -51,17 +51,14 @@ define(function(require) {
 						return element.month === userEnteredInput;
 					}),
 
+					template,
 					results = {
 						revenue: 0,
 						capacity: totalCapacity
-					},
+					};
 
-					// TODO: Needs a refactoring, move this to a template
-					htmlMarkupCode = '<div>The date you entered is invalid!</div>';
-
-				// inputExistInArray (boolean) -> if the input YYYY-MM exist in the array we know we will have data/results
-				// Also comparing the input with the current month we allow the user to have a projection
-				// TODO: Issue! if the current month is bigger than the last month listed in the API response, this projection will never happen
+				// If the input YYYY-MM exist in the array we know we will have data/results
+				// Also comparing the input with the months not listed until the current month. Doing this we allow the user to have a projection
 				if (inputExistInArray || userEnteredInput === currentMonth) {
 					$.each(resultsArray, function(index, value) {
 						if ($.dateBetweenRange(userEnteredInput + '-01', this.startDay, this.endDay)) {
@@ -72,28 +69,21 @@ define(function(require) {
 							$.displayHelpInConsole(this);
 						}
 					});
-
-					// TODO: This is ugly :|, ugly as hell actually
-					var extraDetails = (userEnteredInput === currentMonth) ? 'Projected' : numberOfDaysInMonth + ' days',
-						usedCapacity = String(totalCapacity - results.capacity) + ' of ' + totalCapacity;
-
-					results.revenue = $.stringToCurrency(results.revenue);
-					htmlMarkupCode = '<div><b>' + userEnteredInput + '</b> ( ' + extraDetails + ' )</div>' +
-						'<div style="font-size: 12px; color: #999;">Used capacity: ' + usedCapacity + '</div>' +
-						'<br/><div>Monthly revenue: <b>' + results.revenue + '</b></div>' +
-						'<div>Unoccupied capacity: <b>' + results.capacity + '</b></div>' +
-						'<hr>';
 				}
 
-				// Rendering the template and clearing the form
-				// The following code is the one I will use as soon as I refactor this out to a template
-				// Lines #60, [#76 - #85] will be removed
+				template = _.template($('#results-template').html(), {
+					variable: 'data'
+				})({
+					enteredMonth: userEnteredInput,
+					monthDetails: (userEnteredInput === currentMonth) ? 'Projected' : numberOfDaysInMonth + ' days',
+					usedCapacity: String(totalCapacity - results.capacity) + ' of ' + totalCapacity,
+					totalRevenue: $.stringToCurrency(results.revenue),
 
-				//template = _.template($('#results-template').html(), {});
-				//this.$('.results').html(template);
-				//$('#date').val('');
+					hasResults: (results.revenue !== 0),
+					unoccupiedCapacity: results.capacity
+				});
 
-				this.$('.results').html(htmlMarkupCode);
+				this.$('.results').html(template);
 				$('#date').val('');
 
 				return false;
@@ -130,6 +120,7 @@ define(function(require) {
 				return results;
 			},
 
+			// TODO: Instead of using the console, create a float div in the DOM
 			showHelper: function(partialPayment, dailyCost, actualBilledDays, results) {
 				var type = (partialPayment) ? 'Pro rated' : 'Billed as a Month',
 					details = (partialPayment) ? ' ' + $.stringToCurrency(dailyCost) + ' * per day ' + actualBilledDays + ' days' : '';
